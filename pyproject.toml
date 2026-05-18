@@ -1,0 +1,29 @@
+[project]
+name = "bornsim"
+version = "0.1.0"
+description = "Adjoint-differentiable Born machine simulator for parameterized quantum circuit training."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "cupy-cuda12x==14.0.1",
+    "cuquantum-python==26.3.2",
+    "cuquantum-python-cu12==26.3.2",
+    "jax[cuda12]==0.10.0",
+    "numpy==2.4.4",
+    "optax==0.2.8",
+    "pennylane==0.44.1",
+    "scipy==1.17.1",
+    "scikit-learn==1.8.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==9.0.3",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["bornsim*"]
