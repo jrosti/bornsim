@@ -4,6 +4,8 @@ bornsim is a single-GPU exact statevector simulator for training Born machines w
 
 The package is intentionally narrow: it is not a general quantum SDK. The goal is to make one expensive workload practical on commodity NVIDIA hardware: exact full-distribution training without parameter-shift over every circuit parameter and without an autodiff tape over the probability vector. On a 24 GB GPU, the measured examples reach 28 qubits.
 
+Requires NVIDIA GPU with CUDA; CPU-only execution is not supported. Tests require a GPU and are not run in hosted CI.
+
 The public API covers immutable circuit descriptions, 4-neighbor and king-move grid topology helpers, KL and MMD losses, Adam-based training, probability utilities, and gradient agreement tests against PennyLane references. The initializer maps empirical one-bit marginals to first-layer `RY` angles, calibrates first-layer `RZZ` angles against arbitrary supplied pair correlations on the chosen coupling edges, and optionally adds small random noise to later layers.
 
 In a bounded Nsight Compute sample of 20 custom kernel launches on RTX 3090, the measured mean DRAM throughput was 91.9% of peak.
