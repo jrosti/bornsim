@@ -1,8 +1,10 @@
 # bornsim
 
-bornsim is an adjoint-differentiable exact statevector simulator for Born-machine training, optimized for single NVIDIA GPU hardware. It targets a specific full-probability workload: an `RY-RZ-RZZ` parameterized circuit, an arbitrary user-supplied RZZ coupling graph, and analytic gradients of scalar losses defined on the full output probability vector. It supports up to 28 qubits exact statevector training on 24 GB of GPU memory.
+bornsim is a single-GPU exact statevector simulator for training Born machines with full-probability losses. It is built around one circuit family, `RY-RZ-RZZ`, with an arbitrary user-supplied RZZ coupling graph and a manual adjoint reverse pass for analytic gradients of scalar losses defined on the full output probability vector.
 
-The library includes circuit construction for arbitrary topology, 4-neighbor and king-move helpers for 2D grids, KL and MMD losses, Adam-based training, and gradient verification tests against PennyLane references. Its warm-start initializer is graph-agnostic: it maps empirical one-bit marginals into first-layer `RY` angles and fits first-layer `RZZ` angles to the supplied pairwise correlation matrix on each coupling edge, then adds optional small random noise to later layers. HNSW or other graph-construction methods can be used upstream to choose the coupling graph, but bornsim itself only consumes the resulting edge list, marginals, and pair-correlation matrix.
+The package is intentionally narrow: it is not a general quantum SDK. The goal is to make one expensive workload practical on commodity NVIDIA hardware: exact full-distribution training without parameter-shift over every circuit parameter and without an autodiff tape over the probability vector. On a 24 GB GPU, the measured examples reach 28 qubits.
+
+The public API covers immutable circuit descriptions, 4-neighbor and king-move grid topology helpers, KL and MMD losses, Adam-based training, probability utilities, and gradient agreement tests against PennyLane references. The initializer maps empirical one-bit marginals to first-layer `RY` angles, calibrates first-layer `RZZ` angles against arbitrary supplied pair correlations on the chosen coupling edges, and optionally adds small random noise to later layers.
 
 In a bounded Nsight Compute sample of 20 custom kernel launches on RTX 3090, the measured mean DRAM throughput was 91.9% of peak.
 
