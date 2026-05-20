@@ -8,7 +8,7 @@ The public API covers immutable circuit descriptions, 4-neighbor and king-move g
 
 In a bounded Nsight Compute sample of 20 custom kernel launches on RTX 3090, the measured mean DRAM throughput was 91.9% of peak.
 
-For the specific workload this repository targets, the comparison point is exact statevector simulation with a full probability vector and an analytic gradient of a scalar loss built on top of those probabilities. Across the measured 4-neighbor-grid synthetic full-probability KL sweep, runtime scaled close to linearly with depth while memory stayed effectively flat at fixed qubit count. At the large end of the measured range, `Q=28, L=48` took about `24.3s` forward, `71.6s` backward, `96.9s` total, and used about `16.8 GiB` of GPU memory.
+In the measured 4-neighbor-grid synthetic KL sweep, runtime scaled close to linearly with circuit depth while memory stayed effectively flat at fixed qubit count. The largest reported case, `Q=28, L=48`, took about `24.3s` forward, `71.6s` backward, `96.9s` total, and used about `16.8 GiB` of GPU memory.
 
 ![Execution-Time Comparison](examples/performance_test/readme_execution_time.png)
 
