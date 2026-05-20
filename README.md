@@ -20,7 +20,7 @@ Related backend checks for this exact full-probability gradient workload:
 |---|---|---|
 | `PennyLane lightning.gpu` | `qml.probs(...)` with `diff_method="adjoint"` on the same `RY-RZ-RZZ` circuit family | Adjoint rejected the full-probability circuit directly with `QuantumFunctionError`; this path did not provide `probs -> scalar loss` gradients. |
 | `Qiskit Aer` | GPU statevector forward plus the installed Qiskit gradient stack | GPU statevector forward worked; the available probability-gradient path exposed sampler-side parameter-shift style methods rather than reverse-mode or adjoint gradients for full probabilities. |
-| `TensorCircuit` | JAX full-probability autodiff probe on the same circuit family | The `Q=10, L=6` full-probability path measured about `7.2s` forward and `17.1s` backward after local NumPy-2 compatibility fixes. |
+| `TensorCircuit` | JAX full-probability autodiff probe on the same circuit family | The `Q=10, L=6` full-probability path measured about `7.2s` forward and `17.1s` backward. |
 | `Qibo/Qiboml` | Tiny full-probability JAX-backed gradient probe | A tiny analytic probability-gradient case worked, but the local backend selected CPU execution and emitted large failed GPU allocation attempts. |
 
 As an apples-to-oranges reference point, a Qiskit Aer shot-based estimator was also tested on an easier expectation-value task (`sum_i Z_i`) at `Q=10, L=6`. Even there, `10^6` shots still gave about `7.8e-4` run-to-run standard deviation and about `1.8e-4` mean absolute error versus the exact expectation, which is useful for observables but not a substitute for exact full-probability gradients.
