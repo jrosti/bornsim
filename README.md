@@ -23,7 +23,7 @@ What was evaluated for the same purpose and why it did not replace bornsim:
 
 As an apples-to-oranges reference point, a Qiskit Aer shot-based estimator was also tested on an easier expectation-value task (`sum_i Z_i`) at `Q=10, L=6`. Even there, `10^6` shots still gave about `7.8e-4` run-to-run standard deviation and about `1.8e-4` mean absolute error versus the exact expectation, which is useful for observables but not a substitute for exact full-probability gradients.
 
-A transparent lower-bound memory-efficiency estimate at `Q=28` is `payload_bytes_min / peak_bytes`, with `payload_bytes_min = 2 * state_bytes + prob_bytes`. For this workload the lower bound is about `5.0 GiB / 16.4 GiB = 30.5%`.
+The `16.8 GiB` memory figure is close to the hardware limit, but the irreducible payload is already large: at `Q=28`, the adjoint pass needs at least two complex statevectors plus one probability vector, about `5.0 GiB` before workspaces, allocator overhead, cached gates, and framework buffers.
 
 The main engineering choices behind the gap are:
 
