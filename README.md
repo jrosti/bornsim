@@ -44,29 +44,29 @@ What's actually in here:
 
 Install:
 ```
-pip install -e .
+uv sync
 ```
 
 Generate data (downloads MNIST, binarizes to 5x5 V6_otsu encoding):
 ```
-python examples/generate_v6_otsu.py --output-dir ./data/V6_otsu
+uv run python examples/generate_v6_otsu.py --output-dir ./data/V6_otsu
 ```
 
 Train Born machine at L=6 for 500 steps:
 ```
-python examples/train_l6_500.py --depth 6 --steps 500 --data-path ./data/V6_otsu
+uv run python examples/train_l6_500.py --depth 6 --steps 500 --data-path ./data/V6_otsu
 ```
 
 Run gradient agreement tests against PennyLane reference:
 ```
-pip install -e .[test]
-pytest tests/
+uv sync --extra test
+uv run pytest tests/
 ```
 
 Re-run the comparison harnesses:
 ```
-python examples/performance_test/backend_alternatives_probe.py
-python examples/performance_test/estimator_side_probe.py
-python examples/performance_test/bornsim_readme_sweep.py
-python examples/performance_test/build_readme_timing_figure.py
+uv run python examples/performance_test/backend_alternatives_probe.py
+uv run python examples/performance_test/estimator_side_probe.py
+uv run python examples/performance_test/bornsim_readme_sweep.py
+uv run python examples/performance_test/build_readme_timing_figure.py
 ```
