@@ -27,11 +27,11 @@ The `16.8 GiB` memory figure is close to the hardware limit, but the irreducible
 
 The main engineering choices behind the gap are:
 
-- manual adjoint reverse pass instead of generic parameter-shift
-- no autodiff tape over the full probability vector
-- specialized diagonal `RZ` and `RZZ` kernels instead of routing everything through generic dense gate application
-- depth-flat adjoint memory use
-- fixed circuit family and topology, which removes framework overhead that matters at large `2^Q` state sizes
+- Manual adjoint reverse pass: one backward sweep computes all parameter gradients, instead of evaluating shifted circuits per parameter.
+- No autodiff tape over the probability vector: probabilities are materialized for the loss, but the gradient is pushed back into the statevector cotangent directly.
+- Specialized diagonal `RZ` and `RZZ` kernels: phase gates are applied as elementwise CUDA kernels rather than through generic dense matrix application.
+- Depth-flat adjoint memory use: the backward pass recomputes by reversing gates from the final state instead of storing every intermediate statevector.
+- Fixed circuit family and topology: the simulator avoids general SDK dispatch, tracing, and gate-routing overhead that becomes visible at large `2^Q` state sizes.
 
 Install:
 ```
