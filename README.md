@@ -12,14 +12,14 @@ In the measured 4-neighbor-grid synthetic KL sweep, runtime scaled close to line
 
 ![Execution-Time Comparison](examples/performance_test/readme_execution_time.png)
 
-What was evaluated for the same purpose and why it did not replace bornsim:
+Related backend checks for this exact full-probability gradient workload:
 
-| backend | what was tested | why it did not satisfy the target workload |
+| backend | what was tested | result |
 |---|---|---|
-| `PennyLane lightning.gpu` | `qml.probs(...)` with `diff_method="adjoint"` on the same `RY-RZ-RZZ` circuit family | Adjoint rejected the full-probability circuit directly: `QuantumFunctionError`, so this path did not provide `probs -> scalar loss` gradients. |
-| `Qiskit Aer` | GPU statevector forward plus the installed Qiskit gradient stack | Forward simulation worked, but the probability-gradient path exposed sampler-side parameter-shift style methods rather than reverse-mode or adjoint for full probabilities. |
-| `TensorCircuit` | Tiny JAX full-probability autodiff probe on the same circuit family | After local NumPy-2 compatibility fixes, the tiny `Q=10, L=6` full-probability path worked, but it measured about `7.2s` forward and `17.1s` backward there, so it was far slower than bornsim even before scaling up. |
-| `Qibo/Qiboml` | Tiny full-probability JAX-backed gradient probe | A tiny analytic probability-gradient case worked, but the local backend selected CPU execution and emitted large failed GPU allocation attempts, so it was not a practical single-GPU path here. |
+| `PennyLane lightning.gpu` | `qml.probs(...)` with `diff_method="adjoint"` on the same `RY-RZ-RZZ` circuit family | Adjoint rejected the full-probability circuit directly with `QuantumFunctionError`; this path did not provide `probs -> scalar loss` gradients. |
+| `Qiskit Aer` | GPU statevector forward plus the installed Qiskit gradient stack | GPU statevector forward worked; the available probability-gradient path exposed sampler-side parameter-shift style methods rather than reverse-mode or adjoint gradients for full probabilities. |
+| `TensorCircuit` | JAX full-probability autodiff probe on the same circuit family | The `Q=10, L=6` full-probability path measured about `7.2s` forward and `17.1s` backward after local NumPy-2 compatibility fixes. |
+| `Qibo/Qiboml` | Tiny full-probability JAX-backed gradient probe | A tiny analytic probability-gradient case worked, but the local backend selected CPU execution and emitted large failed GPU allocation attempts. |
 
 As an apples-to-oranges reference point, a Qiskit Aer shot-based estimator was also tested on an easier expectation-value task (`sum_i Z_i`) at `Q=10, L=6`. Even there, `10^6` shots still gave about `7.8e-4` run-to-run standard deviation and about `1.8e-4` mean absolute error versus the exact expectation, which is useful for observables but not a substitute for exact full-probability gradients.
 
