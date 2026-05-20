@@ -1,0 +1,35 @@
+[
+  {
+    "backend": "tensorcircuit_jax",
+    "device": "cuda:0",
+    "n_qubits": 10,
+    "n_layers": 6,
+    "n_edges": 13,
+    "n_params": 218,
+    "forward_seconds": 0.293401,
+    "backward_seconds": 1.55094,
+    "total_seconds": 1.84434
+  },
+  {
+    "backend": "tensorcircuit_jax",
+    "device": "cuda:0",
+    "n_qubits": 10,
+    "n_layers": 12,
+    "n_edges": 13,
+    "n_params": 416,
+    "forward_seconds": 0.570211,
+    "backward_seconds": 3.236079,
+    "total_seconds": 3.806291
+  },
+  {
+    "backend": "tensorcircuit_jax",
+    "device": "cuda:0",
+    "n_qubits": 15,
+    "n_layers": 6,
+    "n_edges": 22,
+    "n_params": 342,
+    "forward_seconds": 0.45719,
+    "backward_seconds": 2.696611,
+    "total_seconds": 3.153801
+  }
+]
