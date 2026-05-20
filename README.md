@@ -4,7 +4,7 @@ bornsim is a single-GPU exact statevector simulator for training Born machines w
 
 The package is intentionally narrow: it is not a general quantum SDK. The goal is to make one expensive workload practical on commodity NVIDIA hardware: exact full-distribution training without parameter-shift over every circuit parameter and without an autodiff tape over the probability vector. On a 24 GB GPU, the measured examples reach 28 qubits.
 
-Requires NVIDIA GPU with CUDA; CPU-only execution is not supported. Tests require a GPU and are not run in hosted CI.
+Requirements: NVIDIA GPU with CUDA 12 and Python 3.12. CPU-only execution is not supported; tests require a GPU and are not run in hosted CI.
 
 The public API covers immutable circuit descriptions, 4-neighbor and king-move grid topology helpers, KL and MMD losses, Adam-based training, probability utilities, and gradient agreement tests against PennyLane references. The initializer maps empirical one-bit marginals to first-layer `RY` angles, calibrates first-layer `RZZ` angles against arbitrary supplied pair correlations on the chosen coupling edges, and optionally adds small random noise to later layers.
 
@@ -34,6 +34,13 @@ The main engineering choices behind the gap are:
 - Specialized diagonal `RZ` and `RZZ` kernels: phase gates are applied as elementwise CUDA kernels rather than through generic dense matrix application.
 - Depth-flat adjoint memory use: the backward pass recomputes by reversing gates from the final state instead of storing every intermediate statevector.
 - Fixed circuit family and topology: the simulator avoids general SDK dispatch, tracing, and gate-routing overhead that becomes visible at large `2^Q` state sizes.
+
+What's actually in here:
+
+- Hand-written CUDA kernels for the three generator gradients: `RY` pair-shift reduction, `RZ` phase-sign reduction, and `RZZ` bit-parity reduction.
+- Factored RBF-kernel MMD on `{0,1}^n` in `O(n * 2^n)` time via repeated `2x2` contractions, instead of materializing a dense `O(4^n)` kernel matrix.
+- Cotangent projection from `dL/dp` back to `dL/dpsi` that explicitly accounts for probability normalization of the statevector.
+- PennyLane parameter-shift agreement tests at `Q=4,6,8` with gradient checks to `atol=1e-5`.
 
 Install:
 ```

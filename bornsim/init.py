@@ -5,8 +5,6 @@ from __future__ import annotations
 from functools import cache
 
 import numpy as np
-import pennylane as qml
-from pennylane import numpy as pnp
 
 from bornsim.circuit import Circuit
 
@@ -98,40 +96,57 @@ def random_init(
     return rng.normal(0.0, scale, size=(circuit.n_params,)).astype(np.float32)
 
 
-def _two_qubit_params(
+def _ry_matrix(theta: float) -> np.ndarray:
+    c = float(np.cos(theta / 2.0))
+    s = float(np.sin(theta / 2.0))
+    return np.array([[c, -s], [s, c]], dtype=np.complex128)
+
+
+def _rz_matrix(theta: float) -> np.ndarray:
+    return np.array(
+        [
+            [np.exp(-0.5j * theta), 0.0],
+            [0.0, np.exp(0.5j * theta)],
+        ],
+        dtype=np.complex128,
+    )
+
+
+def _rzz_matrix(theta: float) -> np.ndarray:
+    phase_same = np.exp(-0.5j * theta)
+    phase_diff = np.exp(0.5j * theta)
+    return np.diag([phase_same, phase_diff, phase_diff, phase_same]).astype(np.complex128)
+
+
+def _apply_single_qubit(state: np.ndarray, gate: np.ndarray, qubit: int) -> np.ndarray:
+    full_gate = np.kron(gate, np.eye(2, dtype=np.complex128)) if qubit == 0 else np.kron(
+        np.eye(2, dtype=np.complex128),
+        gate,
+    )
+    return full_gate @ state
+
+
+@cache
+def _two_qubit_probs(
     theta_i: float,
     theta_j: float,
     alpha_i: float,
     alpha_j: float,
     phi: float,
-) -> pnp.ndarray:
-    params = np.zeros((10,), dtype=np.float32)
-    params[0] = theta_i
-    params[1] = theta_j
-    params[4] = phi
-    params[5] = alpha_i
-    params[6] = alpha_j
-    return pnp.asarray(params, dtype=np.float32)
-
-
-@cache
-def _two_qubit_qnode() -> qml.QNode:
-    dev = qml.device("default.qubit", wires=2)
-
-    @qml.qnode(dev, diff_method="backprop")  # type: ignore[untyped-decorator]
-    def probs(params: pnp.ndarray) -> pnp.ndarray:
-        qml.RY(params[0], wires=0)
-        qml.RY(params[1], wires=1)
-        qml.RZ(params[2], wires=0)
-        qml.RZ(params[3], wires=1)
-        qml.IsingZZ(params[4], wires=[0, 1])
-        qml.RY(params[5], wires=0)
-        qml.RY(params[6], wires=1)
-        qml.RZ(params[7], wires=0)
-        qml.RZ(params[8], wires=1)
-        return qml.probs(wires=[0, 1])
-
-    return probs
+) -> tuple[float, float, float, float]:
+    state = np.array([1.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j], dtype=np.complex128)
+    state = _apply_single_qubit(state, _ry_matrix(theta_i), 0)
+    state = _apply_single_qubit(state, _ry_matrix(theta_j), 1)
+    state = _apply_single_qubit(state, _rz_matrix(0.0), 0)
+    state = _apply_single_qubit(state, _rz_matrix(0.0), 1)
+    state = _rzz_matrix(phi) @ state
+    state = _apply_single_qubit(state, _ry_matrix(alpha_i), 0)
+    state = _apply_single_qubit(state, _ry_matrix(alpha_j), 1)
+    state = _apply_single_qubit(state, _rz_matrix(0.0), 0)
+    state = _apply_single_qubit(state, _rz_matrix(0.0), 1)
+    probs = np.abs(state) ** 2
+    probs /= probs.sum()
+    return tuple(float(value) for value in probs)
 
 
 def _pairwise_correlation_from_probs(probs: np.ndarray) -> float:
@@ -175,7 +190,6 @@ def _fit_rzz_angle_cached(
     alpha_j: float,
     grid_size: int,
 ) -> float:
-    qnode = _two_qubit_qnode()
     best_phi = 0.0
     best_error = float("inf")
     search_lo = -np.pi
@@ -183,7 +197,7 @@ def _fit_rzz_angle_cached(
     for _pass in range(3):
         for phi in np.linspace(search_lo, search_hi, grid_size, dtype=np.float32):
             probs = np.asarray(
-                qnode(_two_qubit_params(theta_i, theta_j, alpha_i, alpha_j, float(phi))),
+                _two_qubit_probs(theta_i, theta_j, alpha_i, alpha_j, float(phi)),
                 dtype=np.float64,
             )
             corr = _pairwise_correlation_from_probs(probs)
