@@ -15,7 +15,9 @@ from pathlib import Path
 from time import perf_counter
 
 os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
-os.environ.setdefault("XLA_PYTHON_CLIENT_MEM_FRACTION", "0.5")
+os.environ.setdefault("XLA_PYTHON_CLIENT_MEM_FRACTION", "0.9")
+os.environ.setdefault("TF_GPU_ALLOCATOR", "cuda_malloc_async")
+os.environ.setdefault("JAX_COMPILATION_CACHE_DIR", "/tmp/jax-cache")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:

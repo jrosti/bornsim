@@ -47,6 +47,16 @@ Install:
 uv sync
 ```
 
+Recommended GPU runtime environment for training and timing runs:
+```
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export XLA_PYTHON_CLIENT_MEM_FRACTION=0.9
+export TF_GPU_ALLOCATOR=cuda_malloc_async
+export JAX_COMPILATION_CACHE_DIR=/tmp/jax-cache
+```
+
+These settings prevent JAX from preallocating most of the GPU before bornsim starts, use the CUDA async allocator to reduce fragmentation pressure, and place the JAX compilation cache in a fast temporary directory. The example training and README timing sweep scripts also set these values by default when they are not already present in the environment.
+
 Generate data (downloads MNIST, binarizes to 5x5 V6_otsu encoding):
 ```
 uv run python examples/generate_v6_otsu.py --output-dir ./data/V6_otsu

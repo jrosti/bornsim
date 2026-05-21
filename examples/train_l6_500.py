@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from time import perf_counter
 
@@ -13,6 +14,11 @@ import optax
 from bornsim import Circuit, init, losses
 from bornsim.topology import king_coupling_map
 from bornsim.trainer import Trainer
+
+os.environ.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
+os.environ.setdefault("XLA_PYTHON_CLIENT_MEM_FRACTION", "0.9")
+os.environ.setdefault("TF_GPU_ALLOCATOR", "cuda_malloc_async")
+os.environ.setdefault("JAX_COMPILATION_CACHE_DIR", "/tmp/jax-cache")
 
 
 def _parse_args() -> argparse.Namespace:
